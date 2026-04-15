@@ -1,52 +1,473 @@
 # Bus Ticket Booking System
 
-Full-stack bus conductor console built with React, Tailwind CSS, FastAPI, SQLAlchemy, and SQLite.
+A modern, production-ready full-stack application for managing bus ticket bookings with an optimized conductor boarding workflow.
 
-## Tech Stack
+**Live Demo**: [View System Architecture](#architecture)
 
-- Frontend: React with hooks, Vite, Tailwind CSS, Axios
-- Backend: FastAPI, REST APIs, SQLAlchemy ORM
-- Database: SQLite
+## 📋 Table of Contents
 
-## Project Structure
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [API Documentation](#api-documentation)
+- [Development](#development)
+- [Deployment](#deployment)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
 
-```text
-.
-|-- backend
-|   |-- app
-|   |   |-- api/routes
-|   |   |-- services
-|   |   |-- config.py
-|   |   |-- database.py
-|   |   |-- main.py
-|   |   |-- models.py
-|   |   `-- schemas.py
-|   `-- requirements.txt
-|-- database
-|   `-- schema.sql
-|-- frontend
-|   |-- src
-|   |   |-- api
-|   |   |-- components
-|   |   `-- utils
-|   |-- package.json
-|   `-- tailwind.config.js
-`-- README.md
-```
+## ✨ Features
 
-## Features
+### Booking Management
+- ✅ Real-time seat availability checking
+- ✅ Book up to 6 seats per mobile number per journey
+- ✅ Edit and cancel bookings
+- ✅ Journey-date specific bookings
+- ✅ Mobile number validation
 
-- Screen 1: book and edit bookings with a visual 2 x 2 seat layout for 15 rows
-- Screen 2: travel-date-wise booking list with call links, boarding status toggle, and edit entry point
-- Seat states: available, selected, and booked
-- Validations for past dates, mobile number format, empty seat selection, duplicate seats, max 6 seats per mobile per day, and double booking
-- Backend conflict checks plus database-level unique seat protection
-- Boarding sequence calculated and displayed using the required farthest-seat-first algorithm
-- Bonus support for mobile search and CSV export
+### Passenger Management
+- ✅ Optimized boarding sequence (farthest-seat-first algorithm)
+- ✅ Boarding status tracking
+- ✅ CSV export for conductor workflow
+- ✅ Mobile number-based search
 
-## Setup
+### UI/UX
+- ✅ Responsive design (mobile, tablet, desktop)
+- ✅ Visual 2×4 seat layout (15 rows = 60 seats)
+- ✅ Real-time seat state updates
+- ✅ Intuitive booking confirmation
+
+### Security & Performance
+- ✅ API key authentication
+- ✅ Request logging and monitoring
+- ✅ Database-level seat collision prevention
+- ✅ Pagination support
+- ✅ Security headers (CORS, X-Frame-Options, etc.)
+- ✅ Structured logging (JSON/Text)
+
+## 🛠 Tech Stack
+
+### Frontend
+- **React 18.3** - UI library
+- **Vite 6.0** - Build tool & dev server
+- **Tailwind CSS 3.4** - Utility-first styling
+- **Axios 1.7** - HTTP client
+
+### Backend
+- **FastAPI 0.115** - Modern Python web framework
+- **SQLAlchemy 2.0** - ORM
+- **Pydantic 2.10** - Data validation
+- **Uvicorn 0.32** - ASGI server
+
+### Infrastructure
+- **Docker & Docker Compose** - Containerization
+- **SQLite/PostgreSQL** - Database
+- **GitHub** - Version control
+
+## 🚀 Quick Start
 
 ### Prerequisites
+- Node.js 18+ & npm
+- Python 3.10+
+- Git
+- Docker (optional, for containerized deployment)
+
+### Option 1: Local Development
+
+#### Backend Setup
+```bash
+# Navigate to backend
+cd backend
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment (Windows)
+.\.venv\Scripts\activate
+# or (macOS/Linux)
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy environment template
+cp .env.example .env
+
+# Run backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+#### Frontend Setup (new terminal)
+```bash
+# Navigate to frontend
+cd frontend
+
+# Install dependencies
+npm install
+
+# Copy environment template
+cp .env.example .env
+
+# Start dev server
+npm run dev
+```
+
+#### Access Application
+- Frontend: http://localhost:5173
+- API Docs: http://localhost:8000/api/docs
+- Health Check: http://localhost:8000/api/health
+
+### Option 2: Docker Compose
+
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Services will be available at:
+# - Frontend: http://localhost:3000
+# - Backend API: http://localhost:8000
+# - API Docs: http://localhost:8000/api/docs
+```
+
+## 📐 Architecture
+
+### System Components
+
+```
+┌─────────────────────────────────────────┐
+│           Frontend (React)              │
+│  - Booking Interface                    │
+│  - Seat Selection                       │
+│  - Booking Management                   │
+└──────────────────┬──────────────────────┘
+                   │ HTTP/REST
+                   ▼
+┌─────────────────────────────────────────┐
+│         API Gateway (FastAPI)           │
+│  - CORS Middleware                      │
+│  - Request Logging                      │
+│  - Authentication                       │
+│  - Rate Limiting                        │
+└──────────────────┬──────────────────────┘
+                   │
+        ┌──────────┴──────────┐
+        ▼                     ▼
+    ┌────────────┐      ┌─────────────┐
+    │  Services  │      │ Exceptions  │
+    │  - Booking │      │  & Handlers │
+    │  - Boarding│      └─────────────┘
+    │  - Rules   │
+    └────────────┘
+        ▼
+    ┌────────────────────────┐
+    │  SQLAlchemy ORM        │
+    │  - Models              │
+    │  - Validation          │
+    └───────────┬────────────┘
+                ▼
+    ┌────────────────────────┐
+    │   SQLite Database      │
+    │   (PostgreSQL ready)   │
+    └────────────────────────┘
+```
+
+## 📚 API Documentation
+
+### Base URL
+```
+http://localhost:8000/api
+```
+
+### Authentication
+All endpoints support optional API key authentication:
+```bash
+curl -H "X-API-Key: your-api-key" http://localhost:8000/api/bookings
+```
+
+### Endpoints
+
+#### 1. Get Available Seats
+```http
+GET /bookings/seat-map?travel_date=2024-12-25
+```
+
+**Response:**
+```json
+{
+  "travel_date": "2024-12-25",
+  "booked_seats": ["A1", "A2", "B3"]
+}
+```
+
+#### 2. Get Boarding Sequence
+```http
+GET /bookings/boarding-sequence?travel_date=2024-12-25
+```
+
+**Response:**
+```json
+{
+  "travel_date": "2024-12-25",
+  "estimated_total_time_seconds": 300,
+  "bookings": [
+    {
+      "sequence_number": 1,
+      "booking_id": "uuid-1",
+      "seats": ["D15", "D14"],
+      "mobile_number": "9876543210",
+      "is_boarded": false
+    }
+  ]
+}
+```
+
+#### 3. Create Booking
+```http
+POST /bookings
+Content-Type: application/json
+
+{
+  "travel_date": "2024-12-25",
+  "mobile_number": "9876543210",
+  "seats": ["A1", "A2"]
+}
+```
+
+#### 4. List Bookings (with Pagination)
+```http
+GET /bookings?travel_date=2024-12-25&skip=0&limit=50&mobile_number=9876543210
+```
+
+#### 5. Get Single Booking
+```http
+GET /bookings/{booking_id}
+```
+
+#### 6. Update Booking
+```http
+PUT /bookings/{booking_id}
+Content-Type: application/json
+
+{
+  "travel_date": "2024-12-25",
+  "mobile_number": "9876543210",
+  "seats": ["A1", "A2", "A3"]
+}
+```
+
+#### 7. Update Boarding Status
+```http
+PATCH /bookings/{booking_id}/boarding
+Content-Type: application/json
+
+{
+  "is_boarded": true
+}
+```
+
+#### 8. Export Bookings to CSV
+```http
+GET /bookings/export/csv?travel_date=2024-12-25
+```
+
+#### 9. Health Check
+```http
+GET /health
+```
+
+### Error Responses
+
+All errors follow a consistent format:
+
+```json
+{
+  "error": {
+    "message": "Seat(s) already booked: A1, A2",
+    "code": "CONFLICT",
+    "details": {
+      "conflicting_seats": ["A1", "A2"]
+    }
+  }
+}
+```
+
+**Common Status Codes:**
+- `400` - Bad Request (validation error)
+- `401` - Unauthorized (invalid API key)
+- `404` - Not Found
+- `409` - Conflict (seat already booked)
+- `422` - Unprocessable Entity (validation error)
+- `429` - Too Many Requests (rate limit exceeded)
+- `500` - Internal Server Error
+
+## 🔧 Development
+
+### Project Structure
+
+```
+backend/
+├── app/
+│   ├── api/
+│   │   └── routes/
+│   │       └── bookings.py          # API endpoints
+│   ├── services/
+│   │   ├── bookings.py              # Business logic
+│   │   ├── boarding.py              # Boarding algorithm
+│   │   └── booking_rules.py         # Validation rules
+│   ├── database.py                  # Database setup
+│   ├── main.py                      # FastAPI app
+│   ├── models.py                    # SQLAlchemy models
+│   ├── schemas.py                   # Pydantic schemas
+│   ├── settings.py                  # Configuration
+│   ├── logger.py                    # Logging setup
+│   ├── security.py                  # Auth utilities
+│   ├── middleware.py                # Custom middleware
+│   └── exceptions.py                # Exception handlers
+├── requirements.txt                 # Dependencies
+└── .env.example                     # Environment template
+
+frontend/
+├── src/
+│   ├── components/                  # React components
+│   ├── api/
+│   │   └── client.js               # Axios config
+│   └── utils/                       # Helper functions
+├── package.json
+├── vite.config.js
+└── tailwind.config.js
+
+database/
+└── schema.sql                       # Database schema
+```
+
+### Running Tests
+
+```bash
+# Backend tests
+cd backend
+pytest
+
+# Frontend tests
+cd frontend
+npm test
+```
+
+### Code Quality
+
+```bash
+# Backend
+cd backend
+flake8 app/
+black app/
+mypy app/
+
+# Frontend
+cd frontend
+npm run lint
+npm run format
+```
+
+## 🐳 Deployment
+
+### Docker Deployment
+
+```bash
+# Build images
+docker-compose build
+
+# Start services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Production Environment Variables
+
+```env
+ENVIRONMENT=production
+DEBUG=false
+DATABASE_URL=postgresql://user:password@db:5432/bus_booking
+LOG_LEVEL=WARNING
+API_KEY=your-secure-api-key
+CORS_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+```
+
+### Database Migration (SQLite → PostgreSQL)
+
+```bash
+# Update DATABASE_URL in .env
+DATABASE_URL=postgresql://user:password@localhost/bus_booking
+
+# Recreate tables
+python -c "from app.database import Base, engine; Base.metadata.create_all(engine)"
+```
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+See [backend/.env.example](backend/.env.example) and [frontend/.env.example](frontend/.env.example) for all available options.
+
+**Key Settings:**
+- `DATABASE_URL` - Database connection string
+- `CORS_ORIGINS` - Allowed frontend origins
+- `API_KEY_ENABLED` - Enable/disable API key validation
+- `API_KEY` - Secret API key
+- `LOG_LEVEL` - Logging verbosity (DEBUG, INFO, WARNING, ERROR)
+- `ENVIRONMENT` - Environment name (development, staging, production)
+
+## 🆘 Troubleshooting
+
+### Backend Issues
+
+**Issue: "Database is locked"**
+- Ensure only one process is accessing SQLite
+- Switch to PostgreSQL for concurrent access
+
+**Issue: "Connection refused" from frontend**
+- Verify backend is running: `curl http://localhost:8000/api/health`
+- Check CORS_ORIGINS in .env
+
+### Frontend Issues
+
+**Issue: "API requests fail"**
+- Verify `VITE_API_BASE_URL` points to correct backend
+- Check browser console for CORS errors
+
+## 📝 Versioning
+
+- **API Version**: v1.0.0
+- **Frontend Version**: v1.0.0
+- **Backend Version**: v1.0.0
+
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+## 👥 Contributing
+
+Contributions are welcome! Please follow these steps:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+For issues and questions:
+- Open a GitHub Issue
+- Check existing documentation
+- Review API docs at `/api/docs`
+
+---
+
+**Last Updated:** 2024  
+**Status**: ✅ Production Ready
 
 - Node.js 18+
 - Python 3.11+

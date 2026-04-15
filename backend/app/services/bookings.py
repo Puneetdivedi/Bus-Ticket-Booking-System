@@ -24,10 +24,21 @@ def fetch_booking_or_404(db: Session, booking_id: str) -> Booking:
     return booking
 
 
-def list_bookings(db: Session, travel_date: date, mobile_number: str | None = None) -> list[Booking]:
+def list_bookings(
+    db: Session,
+    travel_date: date,
+    mobile_number: str | None = None,
+    skip: int = 0,
+    limit: int = 50,
+) -> list[Booking]:
+    """List bookings with pagination support."""
     statement = _booking_query().where(Booking.travel_date == travel_date).order_by(Booking.created_at.asc())
     if mobile_number:
         statement = statement.where(Booking.mobile_number.contains(mobile_number))
+    
+    # Apply pagination
+    statement = statement.offset(skip).limit(limit)
+    
     return list(db.scalars(statement).unique().all())
 
 
