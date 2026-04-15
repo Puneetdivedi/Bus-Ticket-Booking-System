@@ -1,0 +1,20 @@
+INFO:     127.0.0.1:57618 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57618 - "POST /api/bookings HTTP/1.1" 201 Created
+INFO:     127.0.0.1:57618 - "POST /api/bookings HTTP/1.1" 201 Created
+INFO:     127.0.0.1:57618 - "PATCH /api/bookings/b323f7fa-ff50-4924-b540-ce565ba3d63e/boarding HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56302 - "GET /?date=2026-04-20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59130 - "GET /styles.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61305 - "GET /vendor/react.development.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61086 - "GET /vendor/react-dom.development.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51620 - "GET /vendor/axios.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51497 - "GET /vendor/babel.min.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60853 - "GET /app.jsx HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60853 - "GET /api/bookings/seat-map?travel_date=2026-04-20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62731 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62731 - "GET /api/bookings?travel_date=2026-04-20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60853 - "GET /api/bookings/boarding-sequence?travel_date=2026-04-20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58996 - "GET /app.jsx HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:58996 - "GET /api/bookings/seat-map?travel_date=2026-04-20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57236 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57236 - "GET /api/bookings?travel_date=2026-04-20 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58996 - "GET /api/bookings/boarding-sequence?travel_date=2026-04-20 HTTP/1.1" 200 OK
