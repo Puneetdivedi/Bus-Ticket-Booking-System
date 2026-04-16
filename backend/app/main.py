@@ -5,7 +5,7 @@ import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -19,6 +19,11 @@ from app.settings import settings
 # Setup logging
 setup_logging()
 logger = logging.getLogger(__name__)
+
+# Application version
+__version__ = "1.1.0"
+__title__ = "Bus Ticket Booking System API"
+__description__ = "Production-ready API for bus ticket booking management with conductor workflow support"
 
 WEBAPP_DIR = Path(__file__).resolve().parents[2] / "webapp"
 
@@ -36,11 +41,22 @@ async def lifespan(_: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title=settings.APP_NAME,
-    version=settings.APP_VERSION,
+    version=__version__,
+    description=__description__,
     summary="Booking and boarding APIs for the bus conductor workflow.",
     lifespan=lifespan,
     docs_url="/api/docs" if settings.ENABLE_SWAGGER_UI else None,
     redoc_url="/api/redoc" if settings.ENABLE_REDOC else None,
+    openapi_tags=[
+        {
+            "name": "Bookings",
+            "description": "Booking management and operations",
+        },
+        {
+            "name": "System",
+            "description": "System health and status endpoints",
+        },
+    ],
 )
 
 # Add middleware for security and logging
@@ -64,24 +80,40 @@ app.add_exception_handler(Exception, general_exception_handler)
 app.include_router(bookings_router)
 
 
-@app.get("/api/health")
+@app.get("/api/health", tags=["System"])
 async def health_check() -> dict:
-    """Health check endpoint."""
+    """Health check endpoint with version information."""
     logger.debug("Health check requested")
     return {
         "status": "healthy",
-        "version": settings.APP_VERSION,
+        "version": __version__,
         "environment": settings.ENVIRONMENT,
+        "api_title": __title__,
     }
 
 
-@app.get("/")
+@app.get("/", tags=["System"])
 async def root() -> dict:
-    """Root endpoint."""
+    """Root endpoint with API metadata."""
     return {
         "name": settings.APP_NAME,
-        "version": settings.APP_VERSION,
+        "version": __version__,
+        "description": __description__,
         "docs": "/api/docs",
+        "status": "active",
+    }
+
+
+@app.get("/api/info", tags=["System"])
+async def api_info() -> dict:
+    """Get detailed API information."""
+    return {
+        "title": __title__,
+        "version": __version__,
+        "description": __description__,
+        "environment": settings.ENVIRONMENT,
+        "debug": settings.DEBUG,
+        "api_key_enabled": settings.API_KEY_ENABLED,
     }
 
 
