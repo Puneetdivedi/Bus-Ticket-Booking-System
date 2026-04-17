@@ -7,21 +7,28 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZIPMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.bookings import router as bookings_router
+from app.audit_logger import AuditLogger
 from app.database import Base, engine
+from app.environment import validate_environment_on_startup
 from app.exceptions import AppException, app_exception_handler, general_exception_handler
 from app.logger import setup_logging
 from app.middleware import RequestLoggingMiddleware, SecurityHeadersMiddleware
 from app.settings import settings
+from app.size_limit_middleware import (
+    RequestSizeLimitMiddleware,
+    ResponseHeaderValidationMiddleware,
+)
 
 # Setup logging
 setup_logging()
 logger = logging.getLogger(__name__)
 
 # Application version
-__version__ = "1.1.0"
+__version__ = "1.1.2"
 __title__ = "Bus Ticket Booking System API"
 __description__ = "Production-ready API for bus ticket booking management with conductor workflow support"
 
@@ -32,10 +39,24 @@ WEBAPP_DIR = Path(__file__).resolve().parents[2] / "webapp"
 async def lifespan(_: FastAPI):
     """Application lifespan manager."""
     logger.info("Starting application...")
+    
+    # Validate environment
+    if not validate_environment_on_startup():
+        logger.error("Environment validation failed - critical errors detected")
+        raise RuntimeError("Environment validation failed")
+    
+    # Log startup event
+    AuditLogger.log_system_startup(environment=settings.ENVIRONMENT, version=__version__)
+    
+    # Initialize database
     Base.metadata.create_all(bind=engine)
     logger.info("Database initialized")
+    logger.info(f"✓ Application started successfully (v{__version__})")
+    
     yield
+    
     logger.info("Shutting down application...")
+    logger.info("✓ Application shutdown complete")
 
 
 # Create FastAPI app
@@ -59,9 +80,15 @@ app = FastAPI(
     ],
 )
 
-# Add middleware for security and logging
+# Add middleware for security and logging (order matters - added in reverse)
+# Request validation middleware (innermost - processes first)
+app.add_middleware(ResponseHeaderValidationMiddleware)
+app.add_middleware(RequestSizeLimitMiddleware)
+# Security and logging middleware
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)
+# Response compression middleware (outermost - processes last)
+app.add_middleware(GZIPMiddleware, minimum_size=1000)  # Compress responses > 1KB
 
 # Add CORS middleware
 app.add_middleware(
