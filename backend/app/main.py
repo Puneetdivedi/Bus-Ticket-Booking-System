@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -12,10 +13,14 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.bookings import router as bookings_router
 from app.audit_logger import AuditLogger
+from app.backup import get_backup_manager
 from app.database import Base, engine
+from app.db_health import check_database_health
 from app.environment import validate_environment_on_startup
 from app.exceptions import AppException, app_exception_handler, general_exception_handler
+from app.feature_flags import get_feature_manager
 from app.logger import setup_logging
+from app.metrics import get_metrics_collector
 from app.middleware import RequestLoggingMiddleware, SecurityHeadersMiddleware
 from app.settings import settings
 from app.size_limit_middleware import (
@@ -28,7 +33,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 # Application version
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 __title__ = "Bus Ticket Booking System API"
 __description__ = "Production-ready API for bus ticket booking management with conductor workflow support"
 
@@ -142,6 +147,67 @@ async def api_info() -> dict:
         "debug": settings.DEBUG,
         "api_key_enabled": settings.API_KEY_ENABLED,
     }
+
+
+@app.get("/api/health-detailed", tags=["System"])
+async def health_check_detailed() -> dict:
+    """Get detailed health check with database and metrics."""
+    db_health = check_database_health()
+    metrics = get_metrics_collector().get_summary()
+    
+    return {
+        "status": "healthy",
+        "version": __version__,
+        "environment": settings.ENVIRONMENT,
+        "database": db_health,
+        "metrics": metrics,
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+
+
+@app.get("/api/metrics", tags=["System"])
+async def get_metrics() -> dict:
+    """Get application metrics."""
+    collector = get_metrics_collector()
+    return {
+        "summary": collector.get_summary(),
+        "recent_metrics": collector.get_recent_metrics(limit=50),
+    }
+
+
+@app.get("/api/features", tags=["System"])
+async def get_features() -> dict:
+    """Get feature flags status."""
+    manager = get_feature_manager()
+    return {
+        "features": manager.get_all_features(),
+    }
+
+
+@app.get("/api/backups", tags=["System"])
+async def list_backups() -> dict:
+    """List available backups."""
+    backup_mgr = get_backup_manager()
+    backups = backup_mgr.list_backups()
+    
+    return {
+        "backups": backups,
+        "total_count": len(backups),
+    }
+
+
+@app.post("/api/backup/create", tags=["System"])
+async def create_backup() -> dict:
+    """Create a new backup."""
+    backup_mgr = get_backup_manager()
+    result = backup_mgr.create_backup()
+    
+    if result["success"]:
+        logger.info(f"Backup created: {result['backup_name']}")
+    else:
+        logger.error(f"Backup creation failed: {result['error']}")
+    
+    return result
 
 
 # Mount static files (if they exist)
