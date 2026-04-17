@@ -12,6 +12,7 @@ from fastapi.middleware.gzip import GZIPMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.bookings import router as bookings_router
+from app.api_docs import get_doc_generator
 from app.audit_logger import AuditLogger
 from app.backup import get_backup_manager
 from app.database import Base, engine
@@ -22,6 +23,9 @@ from app.feature_flags import get_feature_manager
 from app.logger import setup_logging
 from app.metrics import get_metrics_collector
 from app.middleware import RequestLoggingMiddleware, SecurityHeadersMiddleware
+from app.migrations import get_migration_manager
+from app.profiler import get_profiler
+from app.security_scanner import SecurityScanner
 from app.settings import settings
 from app.size_limit_middleware import (
     RequestSizeLimitMiddleware,
@@ -33,7 +37,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 # Application version
-__version__ = "1.1.3"
+__version__ = "1.1.4"
 __title__ = "Bus Ticket Booking System API"
 __description__ = "Production-ready API for bus ticket booking management with conductor workflow support"
 
@@ -208,6 +212,79 @@ async def create_backup() -> dict:
         logger.error(f"Backup creation failed: {result['error']}")
     
     return result
+
+
+@app.get("/api/profiling/stats", tags=["System"])
+async def get_profiling_stats() -> dict:
+    """Get application profiling statistics."""
+    profiler = get_profiler()
+    stats = profiler.get_statistics()
+    slowest = profiler.get_slowest_operations(limit=10)
+    
+    return {
+        "statistics": stats,
+        "slowest_operations": slowest,
+    }
+
+
+@app.get("/api/migrations/status", tags=["System"])
+async def get_migrations_status() -> dict:
+    """Get database migration status."""
+    manager = get_migration_manager()
+    status = manager.get_status()
+    
+    return {
+        "migrations": status,
+    }
+
+
+@app.post("/api/migrations/apply", tags=["System"])
+async def apply_migrations() -> dict:
+    """Apply pending database migrations."""
+    from app.migrations import apply_pending_migrations
+    
+    result = apply_pending_migrations()
+    logger.info(f"Migrations applied: {result['applied_migrations']}")
+    return result
+
+
+@app.post("/api/security/scan", tags=["System"])
+async def run_security_scan() -> dict:
+    """Run security scan on system configuration."""
+    scanner = SecurityScanner()
+    result = scanner.scan_configuration(settings.dict())
+    
+    return {
+        "scan_result": result.to_dict(),
+    }
+
+
+@app.get("/api/docs/markdown", tags=["System"])
+async def get_api_docs_markdown() -> dict:
+    """Get API documentation in Markdown format."""
+    doc_gen = get_doc_generator()
+    
+    # Register default endpoints
+    doc_gen.register_endpoint(
+        method="GET",
+        path="/api/bookings",
+        summary="List all bookings",
+        description="Retrieve a paginated list of bookings",
+        tags=["Bookings"],
+        response_schema={"bookings": [], "total": 0},
+        example_response={"bookings": [], "total": 0},
+    )
+    
+    return {
+        "documentation": doc_gen.get_markdown_doc(),
+    }
+
+
+@app.get("/api/docs/openapi", tags=["System"])
+async def get_api_docs_openapi() -> dict:
+    """Get API documentation in OpenAPI 3.0 format."""
+    doc_gen = get_doc_generator()
+    return doc_gen.get_openapi_schema()
 
 
 # Mount static files (if they exist)
