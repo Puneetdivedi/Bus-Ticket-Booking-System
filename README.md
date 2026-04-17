@@ -581,3 +581,5 @@ Implementation lives in:
 - Frontend and backend are intentionally separated for clean deployment boundaries.
 - Business rules are enforced in both the UI and the API, with the database acting as the final guard against duplicate seat allocation.
 - The seat map uses hash/set lookups for efficient availability checks and minimal render work.
+#   U p d a t e d :   0 4 / 1 7 / 2 0 2 6   1 5 : 0 3 : 5 5  
+ 
