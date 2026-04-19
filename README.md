@@ -440,9 +440,9 @@ See [backend/.env.example](backend/.env.example) and [frontend/.env.example](fro
 
 ## 📝 Versioning
 
-- **API Version**: v1.0.0
+- **API Version**: v1.1.5
 - **Frontend Version**: v1.0.0
-- **Backend Version**: v1.0.0
+- **Backend Version**: v1.1.5
 
 ## 📄 License
 
@@ -581,5 +581,6 @@ Implementation lives in:
 - Frontend and backend are intentionally separated for clean deployment boundaries.
 - Business rules are enforced in both the UI and the API, with the database acting as the final guard against duplicate seat allocation.
 - The seat map uses hash/set lookups for efficient availability checks and minimal render work.
-#   U p d a t e d :   0 4 / 1 7 / 2 0 2 6   1 5 : 0 3 : 5 5  
+#   U p d a t e d :   0 4 / 1 7 / 2 0 2 6   1 5 : 0 3 : 5 5 
+ 
  

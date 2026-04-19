@@ -10,11 +10,16 @@ Uses semantic versioning: `MAJOR.MINOR.PATCH`
 
 ## Current Version
 
-- **API Version**: 1.1.0
-- **Release Date**: April 16, 2026
+- **API Version**: 1.1.5
+- **Release Date**: April 20, 2026
 - **Status**: Active
 
 ## Version History
+
+### v1.1.5 (April 20, 2026)
+**Improvements:**
+- Updated application version to 1.1.5
+- Documentation updates for version consistency
 
 ### v1.1.0 (April 16, 2026)
 **New Features:**
