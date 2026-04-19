@@ -37,7 +37,7 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 # Application version
-__version__ = "1.1.4"
+__version__ = "1.1.5"
 __title__ = "Bus Ticket Booking System API"
 __description__ = "Production-ready API for bus ticket booking management with conductor workflow support"
 
