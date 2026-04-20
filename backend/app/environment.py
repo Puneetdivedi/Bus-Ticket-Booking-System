@@ -73,7 +73,7 @@ class EnvironmentValidator:
                 )
             logger.info("API key authentication: DISABLED")
         
-        if not settings.CORS_ORIGINS_LIST:
+        if not settings.cors_origins_list:
             self.warnings.append("CORS_ORIGINS is empty - CORS requests will be blocked")
 
     def validate_logging_settings(self) -> None:

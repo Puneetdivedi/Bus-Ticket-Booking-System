@@ -1,7 +1,7 @@
 """Feature flags and configuration management for controlled rollouts."""
 from datetime import datetime
 from enum import Enum
-from typing import Any, dict, Optional
+from typing import Any, Optional
 
 from app.logger import get_logger
 

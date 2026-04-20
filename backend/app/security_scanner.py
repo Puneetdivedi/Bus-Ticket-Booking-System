@@ -1,5 +1,5 @@
 """Security scanning and vulnerability detection utilities."""
-from typing import Any, dict, list, Optional
+from typing import Any, Optional
 
 from app.logger import get_logger
 from app.sanitizers import InputValidator, Sanitizer

@@ -1,6 +1,6 @@
 """API documentation and schema generation utilities."""
 from datetime import datetime
-from typing import Any, dict, list, Optional
+from typing import Any, Optional
 
 from app.logger import get_logger
 

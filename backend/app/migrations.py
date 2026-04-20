@@ -1,6 +1,6 @@
 """Database migration and schema versioning system."""
 from datetime import datetime
-from typing import Any, Callable, dict, list, Optional
+from typing import Any, Callable, Optional
 
 from sqlalchemy import text
 
