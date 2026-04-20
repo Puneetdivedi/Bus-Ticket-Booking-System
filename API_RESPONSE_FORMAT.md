@@ -21,7 +21,7 @@ All API responses follow a consistent JSON structure for predictability and easi
   "meta": {
     "request_id": "req-123456",
     "timestamp": "2024-12-20T10:35:00Z",
-    "version": "1.1.0"
+    "version": "1.1.5"
   }
 }
 ```

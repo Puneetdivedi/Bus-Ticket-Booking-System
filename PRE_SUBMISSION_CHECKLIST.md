@@ -443,7 +443,7 @@ API Docs: http://localhost:8000/docs
 **Date:** April 15, 2026  
 **Email:** sd9501242@gmail.com  
 **Project:** Bus Ticket Booking System  
-**Version:** 1.0.0  
+**Version:** 1.1.5  
 **Assessment:** myPaisaa
 
 ---

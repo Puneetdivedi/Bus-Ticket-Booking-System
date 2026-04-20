@@ -12,7 +12,7 @@ class Settings(BaseSettings):
 
     # App Configuration
     APP_NAME: str = "Bus Ticket Booking System API"
-    APP_VERSION: str = "1.1.0"
+    APP_VERSION: str = "1.1.5"
     DEBUG: bool = False
     ENVIRONMENT: Literal["development", "staging", "production"] = "development"
 
