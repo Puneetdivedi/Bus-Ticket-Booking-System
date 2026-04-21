@@ -119,7 +119,7 @@ app.include_router(bookings_router)
 @app.get("/api/health", tags=["System"])
 async def health_check() -> dict:
     """Health check endpoint with version information."""
-    logger.debug("Health check requested")
+    # logger.debug("Health check requested")  # Removed for production cleanliness
     return {
         "status": "healthy",
         "version": __version__,
