@@ -6,10 +6,11 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 
 from app.api.routes.bookings import router as bookings_router
 from app.api_docs import get_doc_generator
@@ -74,6 +75,15 @@ app = FastAPI(
     version=__version__,
     description=__description__,
     summary="Booking and boarding APIs for the bus conductor workflow.",
+    contact={
+        "name": "Bus Ticket Booking System Team",
+        "url": "https://github.com/Puneetdivedi/Bus-Ticket-Booking-System",
+        "email": "support@example.com",
+    },
+    license_info={
+        "name": "MIT License",
+        "url": "https://opensource.org/licenses/MIT",
+    },
     lifespan=lifespan,
     docs_url="/api/docs" if settings.ENABLE_SWAGGER_UI else None,
     redoc_url="/api/redoc" if settings.ENABLE_REDOC else None,
@@ -111,6 +121,19 @@ app.add_middleware(
 # Register exception handlers
 app.add_exception_handler(AppException, app_exception_handler)
 app.add_exception_handler(Exception, general_exception_handler)
+
+# Add global HTTPException handler for consistent error responses
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "status": "error",
+            "detail": exc.detail,
+            "code": exc.status_code,
+            "path": request.url.path,
+        },
+    )
 
 # Include routers
 app.include_router(bookings_router)
